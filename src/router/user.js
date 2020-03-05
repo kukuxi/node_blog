@@ -24,7 +24,7 @@ const handleUserRouter = (req, res) => {
     }
   };
 
-  if (router[method][path]) {
+  if (router[method] && router[method][path]) {
     return router[method][path]();
   }
 };

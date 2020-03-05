@@ -1,41 +1,59 @@
 const { exec } = require("../db/mysql");
 const getList = (author, keywords) => {
-  let sql = `select * from blog where 1=1 `;
+  let sql = `select * from blogs where 1=1 `;
   if (author) {
-    sql += `and author=${author} `;
+    sql += `and author='${author}' `;
   }
   if (keywords) {
     sql += `and title like '%${keywords}%' `;
   }
-  sql += "order by creattime desc;";
+  sql += "order by createtime desc";
   // 返回一个promise
   return exec(sql);
 };
 
 function getDetail(id) {
-  return {
-    id: 1,
-    title: "标题A",
-    content: "内容A",
-    createTime: 1575547544823,
-    author: "张三"
-  };
+  const sql = `select * from blogs where id='${id}'`;
+  return exec(sql).then(rows => rows[0]);
 }
 
 const newBlog = (blogData = {}) => {
-  console.log("blogData", blogData);
-  return {
-    id: 3 //表示新建博客，插入到数据库的id
-  };
+  const { author, title, content } = blogData;
+  const createtime = +new Date();
+  const sql = `
+    insert into blogs (title, content, createtime, author)
+    values('${title}', '${content}', ${createtime}, '${author}')
+  `;
+  return exec(sql).then(data => {
+    return {
+      id: data.insertId
+    };
+  });
 };
 
 const updateBlog = (id, blogData) => {
-  console.log("blogData", id, blogData);
-  return true;
+  const { content, title } = blogData;
+  const sql = `
+  update blogs set content='${content}', title='${title}' where id=${id}
+  `;
+
+  return exec(sql).then(updateData => {
+    if (updateData.affectedRows > 0) {
+      return true;
+    }
+    return false;
+  });
 };
-const deleteBlog = (id, blogData) => {
-  console.log("blogData", id, blogData);
-  return true;
+const deleteBlog = (id, author) => {
+  const sql = `
+    delete from blogs where id=${id} and author='${author}'
+  `;
+  return exec(sql).then(deleteData => {
+    if (deleteData.affectedRows > 0) {
+      return true;
+    }
+    return false;
+  });
 };
 module.exports = {
   getList,

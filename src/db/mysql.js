@@ -9,18 +9,16 @@ con.connect();
 
 // 执行查询
 function exec(sql) {
-  return new Promise((resolve, reject) => {
-    con.query(
-      (sql,
-      (result, err) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(result);
-      })
-    );
+  const promise = new Promise((resolve, reject) => {
+    con.query(sql, (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
+    });
   });
+  return promise;
 }
 
 module.exports = {

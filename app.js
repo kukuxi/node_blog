@@ -62,11 +62,10 @@ const serverHandler = (req, res) => {
       res.end(JSON.stringify(userData));
       return;
     }
-
     //未命中返回404
-    res.writeHeader(404, { "Content-Type": "text/plain" });
-    res.write("404 Not Found\n");
-    res.end();
+    // res.writeHeader(404, { "Content-Type": "text/plain" });
+    // res.write("404 Not Found\n");
+    // res.end();
   });
 };
 
