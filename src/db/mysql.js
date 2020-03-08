@@ -11,6 +11,7 @@ con.connect();
 function exec(sql) {
   const promise = new Promise((resolve, reject) => {
     con.query(sql, (err, result) => {
+      console.log('result :', result);
       if (err) {
         reject(err);
         return;

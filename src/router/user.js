@@ -1,32 +1,42 @@
-const { loginCheck } = require("../controller/user");
-const { SuccessModel, ErrorModel } = require("../model/resModel");
+const { login } = require('../controller/user')
+const { SuccessModel, ErrorModel } = require('../model/resModel')
+
+// 设置过期时间
+function getCookieExpires() {
+  const d = new Date();
+  const oneDay = 1000 * 60 * 60 * 24;
+  d.setDate = (d.getTime(), oneDay);
+  console.log('d.toGMTString() :', d.toGMTString());
+  return d.toGMTString()
+}
+// const getCookieExpires = () => {
+//   const d = new Date()
+//   d.setTime(d.getTime() + (24 * 60 * 60 * 1000))
+//   console.log('d.toGMTString() is ', d.toGMTString())
+//   return d.toGMTString()
+// }
 const handleUserRouter = (req, res) => {
-  const { method, url } = req;
-  const path = url.split("?")[0];
+  const method = req.method // GET POST
+  // 登录
+  if (method === 'GET' && req.path === '/api/user/login') {
 
-  const router = {
-    //   GET: {
-    //     "/api/list": {
-    //       msg: "这是获取博客列表的接口"
-    //     }
-    //   },
-    POST: {
-      "/api/user/login": () => {
-        // msg: "这是登录的接口"
-        const { username, password } = req.body;
-        const result = loginCheck(username, password);
-        if (result) {
-          return new SuccessModel();
-        } else {
-          return new ErrorModel("登录失败");
-        }
+    const { username, password } = req.query
+    // const { username, password } = req.query
+    const result = login(username, password)
+    return result.then(data => {
+      if (data.username) {
+        res.setHeader('Set-Cookie', `username=${username}; path=/; httpOnly; expires=${getCookieExpires()}`)
+        return new SuccessModel()
       }
-    }
-  };
-
-  if (router[method] && router[method][path]) {
-    return router[method][path]();
+      return new ErrorModel('登录失败')
+    })
   }
-};
+  // if (method === 'GET' && req.path === '/api/user/test') {
+  //   if (req.cookie.username) {
+  //     return new Promise.resolve(new SuccessModel())
+  //   }
+  //   return new Promise.resolve(new ErrorModel('尚未登录'))
+  // }
+}
 
-module.exports = handleUserRouter;
+module.exports = handleUserRouter

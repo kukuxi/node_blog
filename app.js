@@ -36,7 +36,18 @@ const serverHandler = (req, res) => {
 
   //解析path
   const { url } = req;
-  req.path = url.split("?")[0];
+  req.path = url.split("?")[0]
+  // 解析cookie
+  req.cookie = {}
+  const cookieStr = req.headers.cookie || '' // 格式k1=1;k2=2;
+  cookieStr.split(';').forEach(item => {
+    if (!item) {
+      return;
+    }
+    const [value, key] = item.split('=');
+    req.cookie[value.trim()] = key;
+  });
+  console.log('cookie :', req.cookie);
   // 解析query
   req.query = querystring.parse(url.split("?")[1]);
   getPostData(req).then(postData => {
@@ -56,11 +67,13 @@ const serverHandler = (req, res) => {
       });
     }
 
-    const userData = handleUserRouter(req, res);
 
-    if (userData) {
-      res.end(JSON.stringify(userData));
-      return;
+    const userResult = handleUserRouter(req, res);
+    if (userResult) {
+      userResult.then(userData => {
+        res.end(JSON.stringify(userData));
+        return;
+      });
     }
     //未命中返回404
     // res.writeHeader(404, { "Content-Type": "text/plain" });
